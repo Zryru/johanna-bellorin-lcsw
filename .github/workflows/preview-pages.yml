@@ -56,8 +56,12 @@ jobs:
 
       # robots.txt que bloquea todo, como refuerzo del meta noindex. Se genera
       # solo aquí, para que la build de producción no lo herede. Es preview.
-      - name: robots.txt de preview (bloquea indexación)
-        run: printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
+      - name: robots.txt de preview (bloquea indexacion)
+        run: |
+          {
+            echo "User-agent: *"
+            echo "Disallow: /"
+          } > dist/robots.txt
 
       - uses: actions/configure-pages@v5
 
