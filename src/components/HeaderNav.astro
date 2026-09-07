@@ -1,0 +1,193 @@
+---
+/**
+ * Barra de navegación superior, con efecto cristal y sticky.
+ *
+ * Resuelve algo que la maqueta dejaba pendiente: en pantallas estrechas el
+ * menú de enlaces simplemente desaparecía, sin sustituto. Aquí hay menú
+ * hamburguesa de verdad.
+ *
+ * El menú móvil funciona sin JavaScript: es un `<details>` nativo. Menos
+ * código, sin estado que sincronizar, y accesible por defecto.
+ */
+import type { LocaleCode } from '@data/practice';
+import { practice } from '@data/practice';
+import {
+  t,
+  path,
+  otherLocale,
+  NAV_PAGES,
+  LOCALE_SHORT,
+  LOCALE_LABELS,
+  type PageKey,
+} from '@i18n/index';
+
+interface Props {
+  locale: LocaleCode;
+  current: PageKey;
+}
+
+const { locale, current } = Astro.props;
+const ui = t(locale);
+const other = otherLocale(locale);
+
+const links = NAV_PAGES.map((page) => ({
+  page,
+  href: path(page, locale),
+  label: ui.nav[page],
+  isCurrent: page === current,
+}));
+
+// El CTA lleva al formulario de contacto. Los destinos de reserva reales
+// (Headway y SimplePractice) viven en la página de contacto, no en el nav,
+// porque hay dos caminos y un botón no puede explicar cuál te toca.
+const ctaHref = path('contact', locale);
+---
+
+<nav class="nav" aria-label={ui.a11y.mainNav}>
+  <div class="nav__inner">
+    <a class="wordmark" href={path('home', locale)}>
+      <b>{practice.name}</b>
+      <span>{practice.credential} · {locale === 'es' ? 'Nueva York' : 'New York'}</span>
+    </a>
+
+    <div class="nav__links">
+      {links.map(({ href, label, isCurrent }) => (
+        <a href={href} aria-current={isCurrent ? 'page' : undefined}>{label}</a>
+      ))}
+    </div>
+
+    <div class="nav__actions">
+      <a
+        class="nav__lang"
+        href={path(current, other)}
+        lang={other}
+        hreflang={other}
+        aria-label={`${ui.nav.switchLanguage}: ${LOCALE_LABELS[other]}`}
+      >
+        {LOCALE_SHORT[other]}
+      </a>
+
+      <a class="btn nav__cta" href={ctaHref}>{ui.cta.bookConsult}</a>
+
+      {/* Menú móvil. `<details>` nativo: cero JavaScript. */}
+      <details class="nav__mobile">
+        <summary aria-label={ui.nav.openMenu}>
+          <span class="nav__burger" aria-hidden="true"></span>
+        </summary>
+        <div class="nav__drawer glass">
+          {links.map(({ href, label, isCurrent }) => (
+            <a href={href} aria-current={isCurrent ? 'page' : undefined}>{label}</a>
+          ))}
+          <a class="btn nav__drawer-cta" href={ctaHref}>{ui.cta.bookConsult}</a>
+        </div>
+      </details>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .nav__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .nav__lang {
+    font-family: var(--font-ui);
+    font-weight: var(--ui-weight);
+    font-size: 0.875rem;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--hairline);
+    line-height: 1;
+  }
+
+  .nav__lang:hover,
+  .nav__lang:focus-visible {
+    border-color: var(--glass-border-hi);
+  }
+
+  /* ---------- menú móvil ---------- */
+
+  .nav__mobile {
+    display: none;
+    position: relative;
+  }
+
+  .nav__mobile summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.6rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--hairline);
+    display: grid;
+    place-items: center;
+  }
+
+  .nav__mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Hamburguesa dibujada con bordes, sin imagen ni icono externo. */
+  .nav__burger,
+  .nav__burger::before,
+  .nav__burger::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+  }
+
+  .nav__burger {
+    position: relative;
+  }
+
+  .nav__burger::before,
+  .nav__burger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+  }
+
+  .nav__burger::before { top: -6px; }
+  .nav__burger::after  { top: 6px; }
+
+  .nav__drawer {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.75rem);
+    min-width: 15rem;
+    padding: 1rem;
+    border-radius: var(--radius);
+    display: grid;
+    gap: 0.25rem;
+    box-shadow: var(--glass-shadow);
+  }
+
+  .nav__drawer a {
+    font-family: var(--font-ui);
+    font-weight: var(--ui-weight);
+    color: var(--ink);
+    text-decoration: none;
+    padding: 0.6rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .nav__drawer a[aria-current='page'] {
+    background: var(--accent-3);
+  }
+
+  .nav__drawer-cta {
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .nav__mobile { display: block; }
+    /* El CTA de escritorio se oculta porque ya está dentro del cajón. */
+    .nav__cta { display: none; }
+  }
+</style>

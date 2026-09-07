@@ -1,0 +1,23 @@
+# Astro
+dist/
+.astro/
+.output/
+
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Entorno — nunca commitear credenciales
+.env
+.env.*
+!.env.example
+
+# Netlify
+.netlify/
+
+# macOS
+.DS_Store
+
+# Editores
+*.swp
+.idea/

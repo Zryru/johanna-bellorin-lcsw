@@ -1,0 +1,153 @@
+---
+/**
+ * Layout base de todas las páginas.
+ *
+ * Se encarga de: metadatos, hreflang recíproco, JSON-LD, carga de fuentes,
+ * cabecera y pie. Ninguna página escribe un `<head>` por su cuenta.
+ */
+import type { LocaleCode } from '@data/practice';
+import { practice, nameWithCredential, licensedStateNames } from '@data/practice';
+import { t, type PageKey, alternates, path, LOCALE_HREFLANG, DEFAULT_LOCALE } from '@i18n/index';
+import HeaderNav from '@components/HeaderNav.astro';
+import Footer from '@components/Footer.astro';
+
+// Fuentes autoalojadas. Se importan aquí para que Vite las procese y las
+// sirva desde nuestro propio dominio: cero peticiones a terceros, que es el
+// objetivo declarado en docs/legal.md sección 4.
+// Subset latin, que cubre la í de Bellorín.
+import '@fontsource/cormorant-garamond/latin-300.css';
+import '@fontsource/cormorant-garamond/latin-300-italic.css';
+import '@fontsource/cormorant-garamond/latin-500.css';
+import '@fontsource/cormorant-unicase/latin-600.css';
+import '@fontsource/jost/latin-300.css';
+import '@fontsource/jost/latin-500.css';
+import '@fontsource/lato/latin-400.css';
+import '@fontsource/lato/latin-700.css';
+
+import '@styles/skeleton.css';
+import '@styles/glass.css';
+import '@styles/tokens.css';
+
+interface Props {
+  locale: LocaleCode;
+  page: PageKey;
+  title: string;
+  description: string;
+}
+
+const { locale, page, title, description } = Astro.props;
+
+const ui = t(locale);
+const states = licensedStateNames(locale);
+const fullTitle = `${title} — ${nameWithCredential()}`;
+const canonical = new URL(path(page, locale), Astro.site).href;
+const langAlternates = alternates(page);
+
+/**
+ * JSON-LD. `MedicalBusiness` SIN `address`, porque no hay consulta física y
+ * publicar una dirección falsa sería peor que no publicar ninguna.
+ * `schema.org` no tiene tipo `Therapist`, aunque el plan original lo usaba.
+ * Ver docs/plan.md sección 8.
+ */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalBusiness',
+  name: nameWithCredential(),
+  url: Astro.site?.href,
+  description,
+  medicalSpecialty: 'Psychiatric',
+  availableLanguage: practice.sessionLanguages.map((code) => ({
+    '@type': 'Language',
+    name: code === 'es' ? 'Spanish' : 'English',
+  })),
+  areaServed: practice.licensedStates.map((code) => ({
+    '@type': 'State',
+    name: code === 'FL' ? 'Florida' : 'New York',
+  })),
+  ...(practice.contact.email ? { email: practice.contact.email } : {}),
+  ...(practice.contact.phone ? { telephone: practice.contact.phone } : {}),
+  founder: {
+    '@type': 'Person',
+    name: practice.name,
+    jobTitle: 'Licensed Clinical Social Worker',
+    honorificSuffix: practice.credential,
+  },
+};
+
+/**
+ * Palabras clave con las dos grafías del apellido. Mucha gente la va a buscar
+ * sin tilde porque los teclados de Estados Unidos no la ponen con facilidad.
+ * El nombre visible siempre lleva tilde; esto es solo para que la encuentren.
+ */
+const nameVariants = `${practice.name}, ${practice.nameAscii}`;
+---
+
+<!doctype html>
+<html lang={LOCALE_HREFLANG[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    {/* hreflang recíproco en todas las páginas, más x-default al inglés. */}
+    {langAlternates.map(({ hreflang, href }) => (
+      <link rel="alternate" hreflang={hreflang} href={new URL(href, Astro.site).href} />
+    ))}
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(path(page, DEFAULT_LOCALE), Astro.site).href}
+    />
+
+    <meta name="author" content={nameVariants} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={LOCALE_HREFLANG[locale].replace('-', '_')} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/*
+      PENDIENTE: favicon real. La maqueta no tenía, a la espera de marca.
+      Un data URI vacío evita el 404 mientras tanto.
+    */}
+    <link rel="icon" href="data:," />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+
+  <body>
+    {/* Primer elemento enfocable de la página, requisito de accesibilidad. */}
+    <a class="skip-link" href="#main">{ui.nav.skipToContent}</a>
+
+    <HeaderNav locale={locale} current={page} />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer locale={locale} states={states} />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 999;
+    padding: 0.75rem 1.25rem;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-family: var(--font-ui);
+    border-radius: 0 0 var(--radius-sm) 0;
+  }
+
+  .skip-link:focus {
+    left: 0;
+  }
+</style>

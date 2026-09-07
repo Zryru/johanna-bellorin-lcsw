@@ -1,0 +1,235 @@
+---
+/**
+ * Formulario de contacto. Simple, sin campo de texto libre.
+ *
+ * DECISIÓN CERRADA, ver docs/plan.md sección 7: nada de textarea. Recoge solo
+ * nombre, correo, teléfono, idioma preferido y un motivo de una lista cerrada.
+ * Es lo que permite que la infraestructura sea gratis y el riesgo residual
+ * aceptable. Si alguien añade un campo de mensaje libre, hay que releer esa
+ * sección Y docs/legal.md sección 3 antes.
+ *
+ * El envío NO va a Netlify ni a un endpoint de Astro. Va por `fetch` al Worker
+ * de Cloudflare (ver worker/), que valida Turnstile, no almacena nada y
+ * reenvía por Resend al buzón de Johanna.
+ *
+ * El microcopy es la única calidez que hay aquí, en el momento más vulnerable
+ * de la visita. Trabaja el doble. Ver docs/voz-y-contenido.md sección 4.
+ */
+import type { LocaleCode } from '@data/practice';
+import { contactFormNotice } from '@data/legal-notices';
+import { t } from '@i18n/index';
+
+interface Props {
+  locale: LocaleCode;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const f = ui.form;
+
+/**
+ * Endpoint del Worker y clave pública de Turnstile. Se leen de variables de
+ * entorno públicas (PUBLIC_) para que estén disponibles en el cliente.
+ * Mientras no existan, el formulario se pinta pero avisa de que no está
+ * conectado, en vez de enviar a un sitio inexistente.
+ */
+const workerEndpoint = import.meta.env.PUBLIC_FORM_ENDPOINT ?? '';
+const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+
+// Página de gracias a la que redirige el Worker tras un envío correcto.
+const thanksPath = locale === 'es' ? '/es/gracias' : '/thanks';
+
+const reasonOptions = [
+  { value: 'first-time', label: f.reasonOptions.firstTime },
+  { value: 'individual', label: f.reasonOptions.individual },
+  { value: 'couples', label: f.reasonOptions.couples },
+  { value: 'insurance', label: f.reasonOptions.insurance },
+  { value: 'availability', label: f.reasonOptions.availability },
+  { value: 'other', label: f.reasonOptions.other },
+];
+
+// El idioma preferido se preselecciona según el idioma en que la persona está
+// leyendo la web: si llegó a la versión en español, lo normal es que prefiera
+// hablar en español. Puede cambiarlo, es solo el valor por defecto.
+const languageOptions = [
+  { value: 'en', label: f.languageOptions.en },
+  { value: 'es', label: f.languageOptions.es },
+  { value: 'either', label: f.languageOptions.either },
+];
+---
+
+<form
+  class="contact-form glass"
+  method="POST"
+  action={workerEndpoint || '#'}
+  data-thanks={thanksPath}
+  novalidate
+>
+  <h2 class="contact-form__heading">{f.heading}</h2>
+
+  {/* El Worker usa este valor para redirigir a la página de gracias correcta
+      tras un envío sin JavaScript. */}
+  <input type="hidden" name="_thanks" value={thanksPath} />
+
+  <div class="field">
+    <label for="cf-name">{f.name}</label>
+    <input
+      type="text"
+      id="cf-name"
+      name="name"
+      autocomplete="name"
+      required
+      placeholder={f.namePlaceholder}
+    />
+  </div>
+
+  <div class="field">
+    <label for="cf-email">{f.email}</label>
+    <input type="email" id="cf-email" name="email" autocomplete="email" required />
+  </div>
+
+  <div class="field">
+    <label for="cf-phone">{f.phoneOptional}</label>
+    <input type="tel" id="cf-phone" name="phone" autocomplete="tel" />
+  </div>
+
+  <div class="field">
+    <label for="cf-language">{f.preferredLanguage}</label>
+    <select id="cf-language" name="language">
+      {languageOptions.map((o) => (
+        <option value={o.value} selected={o.value === locale}>{o.label}</option>
+      ))}
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="cf-reason">{f.reason}</label>
+    <select id="cf-reason" name="reason" required>
+      <option value="" disabled selected hidden></option>
+      {reasonOptions.map((o) => <option value={o.value}>{o.label}</option>)}
+    </select>
+  </div>
+
+  {/* Honeypot. Un bot rellena todos los campos; una persona no ve este. Si
+      llega con contenido, el Worker descarta el envío. NO es reCAPTCHA. */}
+  <div class="hp" aria-hidden="true">
+    <label for="cf-company">Company</label>
+    <input type="text" id="cf-company" name="company" tabindex="-1" autocomplete="off" />
+  </div>
+
+  {/* Turnstile: antispam de Cloudflare, sin cookies ni seguimiento. Solo se
+      pinta si hay clave configurada. */}
+  {turnstileKey && (
+    <div class="cf-turnstile" data-sitekey={turnstileKey} data-language={locale}></div>
+  )}
+
+  {/* Aviso legal del formulario. NO SUAVIZAR: viene de legal-notices.ts. */}
+  <p class="contact-form__notice">{contactFormNotice[locale]}</p>
+
+  <button type="submit" class="btn contact-form__submit">{f.submit}</button>
+
+  {!workerEndpoint && (
+    <p class="contact-form__warning">
+      {/* Aviso solo visible mientras el endpoint no esté configurado. No es
+          para producción: recuerda que falta conectar el Worker. */}
+      ⚠ PUBLIC_FORM_ENDPOINT sin configurar — el formulario no envía todavía.
+    </p>
+  )}
+</form>
+
+{turnstileKey && (
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer
+    is:inline
+  ></script>
+)}
+
+<script>
+  // Validación de cliente, ligera y accesible. La validación de verdad la hace
+  // el Worker; esto es solo para no mandar a la persona a un error de servidor
+  // por un correo mal escrito.
+  const form = document.querySelector<HTMLFormElement>('.contact-form');
+  if (form && form.getAttribute('action') !== '#') {
+    form.addEventListener('submit', (event) => {
+      const email = form.querySelector<HTMLInputElement>('#cf-email');
+      if (email && !email.checkValidity()) {
+        event.preventDefault();
+        email.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact-form {
+    padding: var(--sp-6);
+    border-radius: var(--radius);
+    display: grid;
+    gap: var(--sp-4);
+    max-width: 34rem;
+  }
+
+  .contact-form__heading {
+    margin: 0;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .field label {
+    font-family: var(--font-ui);
+    font-weight: var(--ui-weight);
+    font-size: 0.9375rem;
+    color: var(--ink);
+  }
+
+  .field input,
+  .field select {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--ink);
+  }
+
+  .field input:focus-visible,
+  .field select:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 1px;
+  }
+
+  /* Honeypot: fuera de pantalla, no display:none, para que los bots lo
+     rellenen igual pero los lectores de pantalla lo ignoren (aria-hidden). */
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__notice {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .contact-form__submit {
+    justify-self: start;
+  }
+
+  .contact-form__warning {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    color: #8a3b12;
+    margin: 0;
+  }
+</style>

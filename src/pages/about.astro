@@ -1,0 +1,47 @@
+---
+/**
+ * Sobre mí, en inglés. Ruta: /about
+ * Su pareja en español es src/pages/es/sobre-mi.astro.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+
+const locale = 'en' as const;
+const entry = await getEntry('pages', 'en/about');
+if (!entry) throw new Error('Falta src/content/pages/en/about.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow } = entry.data;
+---
+
+<BaseLayout locale={locale} page="about" title={title} description={description}>
+  <Hero
+    locale={locale}
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    variant="page"
+  />
+
+  <section class="wrap prose">
+    <Content />
+  </section>
+</BaseLayout>
+
+<style>
+  .prose {
+    padding-block: 3.5rem 5rem;
+    max-width: 44rem;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2.5rem;
+  }
+
+  .prose :global(p) {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+</style>

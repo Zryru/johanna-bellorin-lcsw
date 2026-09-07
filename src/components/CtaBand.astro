@@ -1,0 +1,51 @@
+---
+/**
+ * Banda de llamada a la acción final. Cierra el ritmo de color volviendo al
+ * azul cielo (`--block-1`), igual que la sección de vídeo de arriba.
+ *
+ * Lleva al formulario de contacto, no a un destino de reserva externo: hay dos
+ * caminos de pago y un solo botón no puede explicar cuál le toca a quién. Esa
+ * bifurcación se resuelve en la sección de pagos y en /contact.
+ */
+import type { LocaleCode } from '@data/practice';
+import { t, path } from '@i18n/index';
+
+interface Props {
+  locale: LocaleCode;
+  eyebrow: string;
+  heading: string;
+  body?: string | undefined;
+}
+
+const { locale, eyebrow, heading, body } = Astro.props;
+const ui = t(locale);
+---
+
+<section class="cta-band" id="book">
+  <div class="wrap">
+    <p class="eyebrow">{eyebrow}</p>
+    <h2 set:html={heading} />
+    {body && <p class="lead cta-band__body">{body}</p>}
+    <a class="btn" href={path('contact', locale)}>{ui.cta.bookConsult}</a>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    padding-block: 4.5rem;
+  }
+
+  .cta-band :global(h2) {
+    max-width: 22ch;
+  }
+
+  .cta-band__body {
+    max-width: 52ch;
+  }
+
+  @media (max-width: 899px) {
+    .cta-band {
+      padding-block: 3rem;
+    }
+  }
+</style>

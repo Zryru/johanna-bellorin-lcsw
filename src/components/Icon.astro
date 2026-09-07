@@ -1,0 +1,75 @@
+---
+/**
+ * Iconos de trazo. Dibujados a mano, sin librería y sin peticiones externas.
+ *
+ * Vienen de la maqueta aprobada: trazo de 1.5, sin relleno, heredan el color
+ * del texto. Son deliberadamente simples, casi esquemáticos, que es lo que le
+ * quita seriedad al conjunto sin volverse infantil.
+ *
+ * Si añades un icono nuevo, añádelo también a `ICONS` en
+ * `src/content.config.ts` o los esquemas no lo aceptarán.
+ */
+import type { ICONS } from '../content.config';
+
+interface Props {
+  name: (typeof ICONS)[number];
+  /** Tamaño en píxeles. El contenedor suele mandar más que esto. */
+  size?: number;
+}
+
+const { name, size = 24 } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {/* Persona sola: dos arcos concéntricos. Terapia individual. */}
+  {name === 'arc' && (
+    <>
+      <path d="M3 18a9 9 0 0 1 18 0" />
+      <path d="M7 18a5 5 0 0 1 10 0" />
+    </>
+  )}
+
+  {/* Dos círculos que se solapan. Terapia de pareja. */}
+  {name === 'venn' && (
+    <>
+      <circle cx="9" cy="12" r="6" />
+      <circle cx="15" cy="12" r="6" />
+    </>
+  )}
+
+  {/* Dos anillos enlazados con un destello. Asesoría prematrimonial. */}
+  {name === 'rings' && (
+    <>
+      <circle cx="9.5" cy="14" r="5" />
+      <circle cx="14.5" cy="14" r="5" />
+      <path d="M12 2v3M10.5 3.5h3" />
+    </>
+  )}
+
+  {/* Corazón. Transiciones de vida, vínculos. */}
+  {name === 'heart' && (
+    <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
+  )}
+
+  {/* Flecha en diagonal. Honesta y directa. */}
+  {name === 'arrow' && <path d="M4 20L20 4M14 4h6v6" />}
+
+  {/* Cuadrado con una línea. Duelo y pérdida. */}
+  {name === 'square' && (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="4" />
+      <path d="M9 12h6" />
+    </>
+  )}
+</svg>

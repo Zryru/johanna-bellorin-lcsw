@@ -1,0 +1,152 @@
+---
+/**
+ * Los dos caminos de pago. Ocupa el hueco visual del widget de tarifas de la
+ * maqueta, con el mismo layout de dos columnas y la misma franja verde savia
+ * (`--block-2`).
+ *
+ * Cambia el contenido, no la forma. La maqueta tenía un widget con cifras de
+ * ejemplo ($250 / $150 / $100) que eran inventadas, y además ella no quiere
+ * publicar tarifas: ninguna de las cuatro referencias del sector las publica.
+ *
+ * En su lugar, los dos caminos reales:
+ *   - Con seguro, a través de Headway
+ *   - Pago privado, a través de SimplePractice
+ *
+ * Y el aviso del derecho a un Good Faith Estimate, que SÍ es obligatorio en el
+ * sitio web aunque no se publiquen precios. Son dos cosas distintas: la ley
+ * obliga a informar del derecho a pedir una estimación, no a publicar tarifas.
+ * Ver docs/legal.md sección 1.1.
+ */
+import type { LocaleCode } from '@data/practice';
+import { practice } from '@data/practice';
+import { goodFaithEstimateNotice } from '@data/legal-notices';
+import { t, path } from '@i18n/index';
+
+interface Props {
+  locale: LocaleCode;
+  eyebrow: string;
+  heading: string;
+  intro?: string | undefined;
+}
+
+const { locale, eyebrow, heading, intro } = Astro.props;
+const ui = t(locale);
+
+const es = locale === 'es';
+
+/**
+ * Si la URL de reserva todavía no existe en `practice.ts`, el botón lleva al
+ * formulario de contacto en lugar de a un enlace roto.
+ */
+const insuranceHref = practice.booking.insurance || path('contact', locale);
+const privateHref = practice.booking.privatePay || path('contact', locale);
+
+const paths = [
+  {
+    label: ui.cta.withInsurance,
+    href: insuranceHref,
+    blurb: es
+      ? 'Acepto varios seguros a través de Headway, que se encarga de la facturación para que tú no tengas que perseguir papeleo.'
+      : 'I accept several insurance plans through Headway, which handles the billing so you are not chasing paperwork.',
+    primary: true,
+  },
+  {
+    label: ui.cta.payingPrivately,
+    href: privateHref,
+    blurb: es
+      ? 'Si prefieres pagar por tu cuenta, agendamos directamente y hablamos de la tarifa en la consulta inicial.'
+      : 'If you would rather pay privately, we schedule directly and talk about the fee on the intro call.',
+    primary: false,
+  },
+];
+
+const gfeHeading = es ? 'Tu derecho a una estimación' : 'Your right to an estimate';
+---
+
+<section class="insurance" id="fees">
+  <div class="wrap insurance__grid">
+    <div>
+      <p class="eyebrow">{eyebrow}</p>
+      <h2 set:html={heading} />
+      {intro && <p class="lead">{intro}</p>}
+
+      <div class="paths">
+        {paths.map(({ label, href, blurb, primary }) => (
+          <div class="paths__item">
+            <a class={primary ? 'btn' : 'btn btn--2'} href={href}>{label}</a>
+            <p>{blurb}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/*
+      Aviso del Good Faith Estimate. Es obligatorio y va aquí, en un bloque
+      propio y visible, no en una nota al pie. NO SUAVIZAR el texto: viene de
+      legal-notices.ts. Ver docs/legal.md sección 1.1.
+    */}
+    <aside class="widget gfe">
+      <h3 class="gfe__heading">{gfeHeading}</h3>
+      <p>{goodFaithEstimateNotice[locale]}</p>
+      <a class="gfe__link" href={path('info', locale)}>{ui.cta.readMore} →</a>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .insurance {
+    padding-block: 4.5rem;
+  }
+
+  .paths {
+    display: grid;
+    gap: var(--sp-5);
+    margin-top: var(--sp-6);
+  }
+
+  .paths__item {
+    display: grid;
+    gap: var(--sp-3);
+    justify-items: start;
+  }
+
+  .paths__item p {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  .gfe__heading {
+    margin-top: 0;
+    font-size: 1.25rem;
+  }
+
+  .gfe p {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+
+  .gfe__link {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    text-decoration: none;
+  }
+
+  .gfe__link:hover,
+  .gfe__link:focus-visible {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 899px) {
+    .insurance {
+      padding-block: 3rem;
+    }
+  }
+</style>

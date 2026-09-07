@@ -1,0 +1,161 @@
+---
+/**
+ * Cabecera superior de una página. Dos modos:
+ *
+ *   variant="home" → PORTADA. Dos columnas, con la foto de Johanna a la
+ *     derecha, los CTA, el aviso de jurisdicción y los rasgos. Es la primera
+ *     impresión del sitio. Solo la usa la home.
+ *
+ *   variant="page" → CABECERA de subpágina. Una sola columna, sin foto y sin
+ *     CTA: solo antetítulo, titular y entradilla. El hueco de foto no tiene
+ *     sentido en /about, /services, etc., que no son la portada.
+ *
+ * El degradado de fondo vive SOLO aquí, en las dos variantes: es lo que hace
+ * que el panel de cristal del titular se note. Sin variación de color detrás,
+ * un panel de cristal se lee como una caja blanca. Ver
+ * design-reference/README.md sección 4.
+ */
+import type { LocaleCode } from '@data/practice';
+import { licensedStateNames } from '@data/practice';
+import { jurisdictionNotice } from '@data/legal-notices';
+import { t, path } from '@i18n/index';
+import Icon from '@components/Icon.astro';
+import type { ICONS } from '../content.config';
+
+interface Props {
+  locale: LocaleCode;
+  heading: string;
+  subheading?: string | undefined;
+  eyebrow?: string | undefined;
+  /** 'home' = portada con foto; 'page' = cabecera de subpágina. */
+  variant?: 'home' | 'page';
+  /** Tira de rasgos con iconos. Solo tiene sentido en la portada. */
+  traits?: Array<{ label: string; icon: (typeof ICONS)[number] }> | undefined;
+}
+
+const { locale, heading, subheading, eyebrow, variant = 'page', traits } = Astro.props;
+const ui = t(locale);
+const states = licensedStateNames(locale);
+
+const isHome = variant === 'home';
+---
+
+<header class:list={['hero', !isHome && 'hero--page']}>
+  <div class:list={['wrap', 'hero__grid', !isHome && 'hero__grid--page']}>
+    <div class="hero__copy glass">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+
+      {/* `set:html` porque los titulares llevan <em> para el énfasis en
+          cursiva. Es la única etiqueta HTML permitida en el frontmatter. */}
+      <h1 set:html={heading} />
+
+      {subheading && <p class="lead">{subheading}</p>}
+
+      <div class="hero__body">
+        <slot />
+      </div>
+
+      {isHome && (
+        <>
+          <div class="hero__cta">
+            <a class="btn" href={path('contact', locale)}>{ui.cta.bookConsult}</a>
+            <a class="btn btn--ghost" href={path('services', locale)}>{ui.cta.learnMore}</a>
+          </div>
+
+          {/*
+            Aviso de jurisdicción. Se genera desde practice.licensedStates, así
+            que cuando llegue la licencia de Florida no hay que tocar nada aquí.
+            Ver src/data/legal-notices.ts.
+          */}
+          <p class="hero__jurisdiction">{jurisdictionNotice(locale, states)}</p>
+        </>
+      )}
+
+      {isHome && traits && traits.length > 0 && (
+        <ul class="traits">
+          {traits.map(({ label, icon }) => (
+            <li><Icon name={icon} />{label}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+
+    {/*
+      Marcador de foto: SOLO en la portada. Johanna va a hacer sesión de fotos
+      profesional, sin fecha todavía; mientras tanto es un degradado, como en la
+      maqueta. Ver docs/preguntas-abiertas.md pregunta 14.
+    */}
+    {isHome && <div class="hero__photo photo" aria-hidden="true"></div>}
+  </div>
+</header>
+
+<style>
+  .hero__grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 3rem;
+    align-items: center;
+    padding-block: 4.5rem 6rem;
+  }
+
+  /* Cabecera de subpágina: una sola columna, sin la reserva de espacio para la
+     foto, y algo más baja porque debajo empieza el contenido enseguida. */
+  .hero__grid--page {
+    grid-template-columns: 1fr;
+    max-width: 52rem;
+    padding-block: 4rem 3rem;
+  }
+
+  .hero__copy {
+    padding: 2.5rem;
+    border-radius: var(--radius);
+  }
+
+  .hero__body :global(p) {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .hero__jurisdiction {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .hero__photo {
+    min-height: 26rem;
+    border-radius: var(--radius);
+    background: linear-gradient(150deg, var(--mesh-4), var(--mesh-1) 60%, var(--mesh-2));
+  }
+
+  /* `.traits` ya viene de skeleton.css; aquí solo el margen superior, que
+     depende de si hay CTA por encima. */
+  .traits {
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 899px) {
+    .hero__grid {
+      grid-template-columns: 1fr;
+      padding-block: 3rem 4rem;
+    }
+
+    .hero__copy { padding: 1.75rem; }
+
+    .hero__photo {
+      min-height: 16rem;
+      order: -1;
+    }
+  }
+</style>

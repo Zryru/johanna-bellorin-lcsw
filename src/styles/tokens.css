@@ -1,0 +1,214 @@
+/* ============================================================
+   TOKENS DE DISEÑO — variante T4 · Editorial fina
+   ============================================================
+
+   Portados literalmente desde design-reference/index.html. Los valores
+   están verificados: la auditoría de contraste AA se hizo contra estos
+   colores exactos, nodo a nodo, con un mínimo global de 4.72:1 en
+   escritorio y móvil.
+
+   SI CAMBIAS UN COLOR, HAY QUE REPETIR LA AUDITORÍA. No basta con mirarlo:
+   en las rondas de diseño hubo más de un color que pasaba a ojo y fallaba
+   medido. Ver docs/legal.md sección 5 y design-reference/README.md sección 6.
+
+   Regla de oro de la paleta: nunca negro puro, nunca fondos oscuros. Toda
+   la paleta se construyó sobre la restricción de huir de lo frío.
+   ============================================================ */
+
+:root {
+  /* ---------- estructurales ---------- */
+  --bg:        #FDF8F0;   /* crema cálido, fondo general */
+  --bg-alt:    #DCEEF5;   /* fondo alterno, sin uso activo */
+  --block-1:   #A8D0E2;   /* franja azul cielo: vídeo y CTA final */
+  --block-2:   #C4DBC4;   /* franja verde savia: sección de tarifas */
+  --surface:   rgba(255, 255, 255, .55);
+
+  /* ---------- tinta ---------- */
+  --ink:       #1F3D2B;   /* verde bosque oscuro. NUNCA #000 */
+  --ink-muted: #3F5346;
+  --hairline:  rgba(31, 61, 43, .14);
+
+  /* ---------- acentos ---------- */
+  --accent:      #E4E356;  /* CTA primario, cítrico */
+  --accent-fg:   #1F3D2B;
+  --accent-2:    #F5853C;  /* CTA secundario, naranja */
+  --accent-2-fg: #1F3D2B;
+  --accent-3:    #F4F3B8;  /* fondos de icono en tarjetas */
+  --accent-ink:  #4F4E0E;  /* antetítulos y enlaces "learn more" */
+
+  /* ---------- degradado de la cabecera ----------
+     Vive SOLO dentro de .hero. El efecto cristal necesita variación de
+     color detrás para notarse; sobre un tono plano un panel de cristal
+     se lee como una caja blanca sin gracia. El resto de la página usa
+     las franjas planas --block-1 y --block-2.
+     Ver design-reference/README.md sección 4. */
+  --mesh-1: #FFAF68;   /* melocotón, arranca arriba a la izquierda */
+  --mesh-2: #E0DE55;   /* cítrico */
+  --mesh-3: #7CC5E7;   /* cielo, mancha abajo a la derecha */
+  --mesh-4: #FF937D;   /* coral, centro del degradado lineal */
+
+  /* Estas cuatro en transparent desactivan el degradado de página completa
+     que glass.css trae por defecto. No quitarlas. */
+  --mesh-1-wash: transparent;
+  --mesh-2-wash: transparent;
+  --mesh-3-wash: transparent;
+  --mesh-4-wash: transparent;
+
+  /* ---------- efecto cristal ---------- */
+  --glass-bg:        rgba(255, 255, 255, .48);
+  --glass-bg-nav:    rgba(255, 255, 255, .66);
+  --glass-bg-solid:  rgba(255, 255, 255, .68);
+  --glass-blur:      22px;
+  --glass-sat:       160%;
+  --glass-border:    rgba(255, 255, 255, .58);
+  --glass-border-hi: rgba(31, 61, 43, .28);
+  --glass-sheen:     rgba(255, 255, 255, .95);
+  --glass-shadow:    0 14px 40px rgba(31, 61, 43, .10);
+  --glass-fallback:  #FFFCF6;   /* repliegue sin backdrop-filter */
+
+  /* ---------- tipografía ----------
+     Todas autoalojadas con Fontsource, licencia OFL. Se importan en
+     BaseLayout.astro, no aquí, para que el bundler las procese.
+
+     RIESGO DOCUMENTADO Y PENDIENTE DE COMPROBAR A OJO: Cormorant Garamond
+     a peso 300 tiene trazos muy finos. El contraste de color cumple con
+     margen, pero el contraste no mide grosor de trazo, y ese trazo sobre
+     el degradado y detrás de un panel de cristal es la combinación más
+     exigente del diseño. Mirarlo en un móvil real con luz de sol antes de
+     dar la tipografía por cerrada. Recambio ya evaluado si falla:
+     Newsreader en peso ligero. Ver docs/plan.md sección 5. */
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-ui:      "Jost", system-ui, sans-serif;
+  --font-body:    "Lato", system-ui, sans-serif;
+  --display-weight: 300;
+  --display-tracking: 0em;
+  --ui-weight: 300;
+
+  /* El nombre de Johanna. Aquí vive toda la personalidad tipográfica del
+     sitio: es la decisión central de T4 y la razón por la que funciona sin
+     volverse difícil de leer. No repartir carácter por el resto del texto. */
+  --font-wordmark:   "Cormorant Unicase", Georgia, serif;
+  --wordmark-weight: 600;
+
+  /* ---------- forma ---------- */
+  --radius:      28px;
+  --radius-sm:   16px;
+  --radius-pill: 300px;   /* cápsula, heredado de Ostler */
+  --shadow:      var(--glass-shadow);
+}
+
+/* ============================================================
+   AJUSTES ESPECÍFICOS DE T4
+   Overrides sobre skeleton.css que definen esta variante.
+   ============================================================ */
+
+/* Franjas de color por sección.
+
+   OJO AL ORDEN DE CARGA: glass.css pone .video/.insurance/.cta-band en
+   `background: transparent` a propósito, porque en la maqueta original el
+   color de esas franjas se declaraba en el <style> del index.html, que se
+   cargaba después. Aquí tokens.css es el último import del layout, así que
+   este es el sitio correcto para restaurarlas. Sin esto, las tres franjas se
+   ven crema y se pierde el ritmo de color.
+
+   El ritmo al bajar por la home es parte del encanto del diseño:
+   crema → cielo → crema → savia → crema → cielo → pie de cristal. */
+.video,
+.cta-band {
+  background: var(--block-1);   /* azul cielo */
+}
+
+.insurance {
+  background: var(--block-2);   /* verde savia */
+}
+
+/* Franja de color reutilizable, para secciones que alternan fondo fuera de la
+   home. La usa el detalle de servicios en /services. Mismo azul cielo que
+   .video y .cta-band, pero con un nombre que dice qué hace y no dónde se usó
+   por primera vez. */
+.band-sky { background: var(--block-1); }
+
+/* Banda de degradado detrás del hero. Sin esto el panel de cristal no tiene
+   nada que desenfocar. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 22% 0;
+  background:
+    radial-gradient(60% 90% at 78% 30%, var(--mesh-2) 0%, transparent 70%),
+    radial-gradient(55% 85% at 96% 78%, var(--mesh-3) 0%, transparent 72%),
+    linear-gradient(112deg, var(--mesh-1) 0%, var(--mesh-4) 46%, var(--mesh-2) 100%);
+}
+
+@media (max-width: 899px) {
+  .hero::before { inset: 0 0 60% 0; }
+}
+
+/* En la cabecera de subpágina no hay foto debajo del degradado, así que el
+   degradado llena el hero entero en vez de dejar la franja inferior que en la
+   portada da respiro a la columna de la foto. */
+.hero--page::before {
+  inset: 0;
+}
+@media (max-width: 899px) {
+  .hero--page::before { inset: 0; }
+}
+
+/* Cursiva de énfasis dentro de los titulares. */
+h1 em, h2 em, h3 em {
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* Cormorant Garamond a peso 300 pide más tamaño que la escala por defecto
+   del esqueleto para no perderse dentro del panel de cristal. */
+h1 { font-size: clamp(2.5rem, 5vw, 3.875rem); line-height: 1.08; }
+h2 { font-size: clamp(1.875rem, 3.4vw, 2.75rem); }
+
+/* T4 no usa mayúsculas ni tracking ampliado, a diferencia de las otras
+   variantes que se probaron. */
+.btn,
+.nav__links a,
+.eyebrow,
+.card__more {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.btn { font-weight: 500; }
+
+/* Cormorant Unicase mezcla mayúsculas y minúsculas a la misma altura, así
+   que pide algo más de tamaño y tracking para leerse con calma.
+
+   PENDIENTE DE COMPROBAR: la tilde de "Bellorín". En un diseño unicase un
+   acento es un caso raro y puede quedar mal colocado o apretado contra el
+   borde superior. Si falla: pasar el wordmark a Cormorant Garamond, o dar
+   más interlineado. Ver docs/plan.md sección 5. */
+.wordmark b {
+  font-size: 1.625rem;
+  letter-spacing: .01em;
+}
+
+/* ============================================================
+   MOVIMIENTO REDUCIDO — no negociable
+   Quien tenga esta preferencia activada debe ver la página completa, sin
+   una sola animación y sin perder contenido. Es relevante en un sitio de
+   terapia porque parte del público tiene sensibilidad al movimiento.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

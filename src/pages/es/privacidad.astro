@@ -1,0 +1,49 @@
+---
+/**
+ * Privacidad y legal, en español. Ruta: /es/privacidad
+ * Archivo de contenido: privacy.md (nombre canónico en inglés).
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+
+const locale = 'es' as const;
+const entry = await getEntry('pages', 'es/privacy');
+if (!entry) throw new Error('Falta src/content/pages/es/privacy.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading } = entry.data;
+---
+
+<BaseLayout locale={locale} page="privacy" title={title} description={description}>
+  <section class="wrap legal-page">
+    <h1 set:html={heading} />
+    {subheading && <p class="lead">{subheading}</p>}
+    <div class="legal-page__body">
+      <Content />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    padding-block: 3.5rem 5rem;
+    max-width: 44rem;
+  }
+
+  .legal-page__body :global(h2) {
+    margin-top: 2.5rem;
+  }
+
+  .legal-page__body :global(p),
+  .legal-page__body :global(li) {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+
+  .legal-page__body :global(hr) {
+    border: none;
+    border-top: 1px solid var(--hairline);
+    margin: 2.5rem 0;
+  }
+</style>

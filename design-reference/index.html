@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Johanna Bellorin, LCSW — Therapy in NYC</title>
+<!-- Sin favicon todavía: pendiente de logo/marca real. -->
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Cormorant+Unicase:wght@500;600&family=Jost:wght@300;400;500&family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared/skeleton.css">
+<link rel="stylesheet" href="shared/glass.css">
+<style>
+/* =============================================================
+   T4 · EDITORIAL FINA — variante elegida
+   Ver README.md en esta carpeta para la explicación completa de
+   cada decisión. Este bloque son solo los tokens y overrides.
+   ============================================================= */
+:root {
+  /* ---------- estructurales ---------- */
+  --bg:        #FDF8F0;
+  --bg-alt:    #DCEEF5;
+  --block-1:   #A8D0E2;   /* franja azul cielo, secciones vídeo y CTA */
+  --block-2:   #C4DBC4;   /* franja verde savia, sección de seguros */
+  --surface:   rgba(255,255,255,.55);
+
+  /* ---------- tinta ---------- */
+  --ink:       #1F3D2B;
+  --ink-muted: #3F5346;
+  --hairline:  rgba(31,61,43,.14);
+
+  /* ---------- acentos ---------- */
+  --accent:      #E4E356;   /* CTA primario */
+  --accent-fg:   #1F3D2B;
+  --accent-2:    #F5853C;   /* CTA secundario */
+  --accent-2-fg: #1F3D2B;
+  --accent-3:    #F4F3B8;   /* fondos de icono */
+  --accent-ink:  #4F4E0E;   /* antetítulos, enlaces "learn more" */
+
+  /* ---------- degradado de la cabecera (solo en el hero) ---------- */
+  --mesh-1: #FFAF68;   /* melocotón, arranca arriba a la izquierda */
+  --mesh-2: #E0DE55;   /* cítrico */
+  --mesh-3: #7CC5E7;   /* cielo, mancha abajo a la derecha */
+  --mesh-4: #FF937D;   /* coral, centro del degradado */
+  /* Estas cuatro en transparent desactivan el mesh de página que
+     trae shared/glass.css por defecto. Aquí el degradado vive SOLO
+     en el hero (.hero::before); el resto de la página usa las
+     franjas de color planas --block-1 / --block-2. Ver README,
+     sección "Efecto cristal". */
+  --mesh-1-wash: transparent;
+  --mesh-2-wash: transparent;
+  --mesh-3-wash: transparent;
+  --mesh-4-wash: transparent;
+
+  /* ---------- efecto cristal ---------- */
+  --glass-bg:        rgba(255,255,255,.48);
+  --glass-bg-nav:    rgba(255,255,255,.66);
+  --glass-bg-solid:  rgba(255,255,255,.68);
+  --glass-blur:      22px;
+  --glass-sat:       160%;
+  --glass-border:    rgba(255,255,255,.58);
+  --glass-border-hi: rgba(31,61,43,.28);
+  --glass-sheen:     rgba(255,255,255,.95);
+  --glass-shadow:    0 14px 40px rgba(31,61,43,.10);
+  --glass-fallback:  #FFFCF6;   /* repliegue sin backdrop-filter */
+
+  /* ---------- tipografía ----------
+     Ver README, sección "Tipografía", para el porqué de cada
+     elección y el riesgo documentado de Cormorant a peso 300. */
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-ui:      "Jost", system-ui, sans-serif;
+  --font-body:    "Lato", system-ui, sans-serif;
+  --display-weight: 300;
+  --display-tracking: 0em;
+  --ui-weight: 300;
+
+  --font-wordmark:   "Cormorant Unicase", Georgia, serif;
+  --wordmark-weight: 600;
+
+  /* ---------- forma ---------- */
+  --radius:      28px;
+  --radius-sm:   16px;
+  --radius-pill: 300px;
+  --shadow:      var(--glass-shadow);
+}
+
+.video     { background: var(--block-1); }
+.insurance { background: var(--block-2); }
+.cta-band  { background: var(--block-1); }
+
+/* Banda de degradado detrás del hero. Sin esto el panel de cristal
+   no tiene nada que desenfocar y se ve como una caja blanca. */
+.hero { position: relative; isolation: isolate; background: transparent; }
+.hero::before {
+  content: ''; position: absolute; z-index: -1;
+  inset: 0 0 22% 0;
+  background:
+    radial-gradient(60% 90% at 78% 30%, var(--mesh-2) 0%, transparent 70%),
+    radial-gradient(55% 85% at 96% 78%, var(--mesh-3) 0%, transparent 72%),
+    linear-gradient(112deg, var(--mesh-1) 0%, var(--mesh-4) 46%, var(--mesh-2) 100%);
+}
+@media (max-width: 899px) { .hero::before { inset: 0 0 60% 0; } }
+
+h1 em, h2 em, h3 em { font-style: italic; font-weight: 300; }
+/* Cormorant Garamond es una serif clásica y estrecha, pero a peso
+   300 pide algo más de tamaño que la escala por defecto del
+   esqueleto para no perderse dentro del panel de cristal. */
+h1 { font-size: clamp(2.5rem, 5vw, 3.875rem); line-height: 1.08; }
+h2 { font-size: clamp(1.875rem, 3.4vw, 2.75rem); }
+
+.btn, .nav__links a, .eyebrow, .card__more {
+  text-transform: none;
+  letter-spacing: normal;
+}
+.btn { font-weight: 500; }
+
+/* El nombre en Cormorant Unicase (mayúsculas y minúsculas a la
+   misma altura) pide algo más de tamaño y de tracking para que la
+   mezcla se lea con calma. */
+.wordmark b { font-size: 1.625rem; letter-spacing: .01em; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__inner">
+    <a class="wordmark" href="#"><b>Johanna Bellorin</b><span>LCSW · New York City</span></a>
+    <div class="nav__links">
+      <a href="#about">About</a><a href="#services">Services</a>
+      <a href="#fees">Fees</a><a href="#faq">FAQ</a>
+    </div>
+    <a class="btn" href="#book">Book a consult</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero__grid">
+    <div class="hero__copy">
+      <p class="eyebrow">Welcome — licensed clinical social worker</p>
+      <h1>Therapy in NYC that doesn't feel like a <em>cold chore</em>.</h1>
+      <p class="lead">Warm, engaged and direct. A space where showing up feels easy,
+         and where the work actually goes somewhere.</p>
+      <div class="hero__cta">
+        <a class="btn" href="#book">Book a free consult</a>
+        <a class="btn btn--ghost" href="#services">See how I work</a>
+      </div>
+      <ul class="traits">
+        <li><svg viewBox="0 0 24 24"><path d="M3 18a9 9 0 0 1 18 0"/><path d="M7 18a5 5 0 0 1 10 0"/></svg>Individual therapy</li>
+        <li><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg>Couples</li>
+        <li><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"/></svg>Life transitions</li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 20L20 4M14 4h6v6"/></svg>Honest &amp; direct</li>
+      </ul>
+    </div>
+    <div>
+      <div class="photo"><span class="photo__tag">Foto de Johanna</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="video" id="about">
+  <div class="wrap video__grid">
+    <div class="video__frame">
+      <button class="play" aria-label="Play the welcome video">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <span class="photo__tag" style="position:absolute;bottom:18px;left:18px">Vídeo de 1 min</span>
+    </div>
+    <div class="quote">
+      <p>“You are the expert on your own life. My job is to help you <em>connect the dots</em>.”</p>
+      <cite>Johanna Bellorin, LCSW</cite>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <p class="eyebrow">What I work with</p>
+    <h2>Areas of expertise</h2>
+    <p class="lead" style="margin-bottom:var(--sp-6)">Every path looks different. These are the ones I walk most often.</p>
+    <div class="bento">
+      <a class="card card--wide" href="#">
+        <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M3 18a9 9 0 0 1 18 0"/><path d="M7 18a5 5 0 0 1 10 0"/></svg></span>
+        <h3>Individual therapy</h3>
+        <p>Anxiety, self-esteem, burnout and the patterns that keep repeating. Weekly sessions, in person or virtual.</p>
+        <span class="card__more">Learn more →</span>
+      </a>
+      <a class="card" href="#">
+        <span class="card__icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg></span>
+        <h3>Couples therapy</h3>
+        <p>Communication, trust and repair — for partners at any stage.</p>
+        <span class="card__more">Learn more →</span>
+      </a>
+      <a class="card" href="#">
+        <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M4 20L20 4M14 4h6v6"/></svg></span>
+        <h3>Life transitions</h3>
+        <p>New city, new role, new family shape. Change is disorienting even when you chose it.</p>
+        <span class="card__more">Learn more →</span>
+      </a>
+      <a class="card" href="#">
+        <span class="card__icon"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"/></svg></span>
+        <h3>Dating &amp; relationships</h3>
+        <p>Attachment, boundaries and the stories we bring into every connection.</p>
+        <span class="card__more">Learn more →</span>
+      </a>
+      <a class="card" href="#">
+        <span class="card__icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 12h6"/></svg></span>
+        <h3>Grief &amp; loss</h3>
+        <p>There is no timeline. We go at the pace the loss asks for.</p>
+        <span class="card__more">Learn more →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="insurance" id="fees">
+  <div class="wrap insurance__grid">
+    <div>
+      <p class="eyebrow">Fees &amp; insurance</p>
+      <h2>Out-of-network, made <em>simple</em>.</h2>
+      <p>I'm an out-of-network provider, which means you pay the session fee and your
+         insurance reimburses part of it. I file the claim on your behalf — you don't
+         chase paperwork.</p>
+      <p>Most PPO plans reimburse between 50% and 80% after the deductible. Here's
+         roughly how it looks.</p>
+      <a class="btn btn--2" href="#book">Check my benefits</a>
+    </div>
+    <div class="widget">
+      <h4 style="margin-top:0">Estimated cost per session</h4>
+      <dl style="margin:0">
+        <div class="widget__row"><dt>Session fee (50 min)</dt><dd>$250</dd></div>
+        <div class="widget__row"><dt>Typical PPO reimbursement</dt><dd>−$150</dd></div>
+        <div class="widget__row"><dt>Deductible met</dt><dd>Yes</dd></div>
+      </dl>
+      <div class="widget__total"><span>Your estimated cost</span><b>$100</b></div>
+      <p style="font-size:.8125rem;color:var(--ink-muted);margin:var(--sp-4) 0 0">
+        Illustrative only. Actual reimbursement depends on your plan.</p>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <p class="eyebrow">Good to know</p>
+    <h2>Questions people ask first</h2>
+    <div class="faq glass" style="margin-top:var(--sp-6);padding:var(--sp-6)">
+      <details open><summary>How long is a session?</summary>
+        <p>Fifty minutes for individual work, sixty for couples. We can talk about longer
+           sessions if that suits the work better.</p></details>
+      <details><summary>Virtual or in person?</summary>
+        <p>Both. I see clients at the Manhattan office and across New York State by video.
+           Plenty of people mix the two depending on the week.</p></details>
+      <details><summary>How often would we meet?</summary>
+        <p>Weekly to start. It builds momentum, and momentum is most of the work. We can
+           space things out once you're steady.</p></details>
+      <details><summary>What's your cancellation policy?</summary>
+        <p>Twenty-four hours' notice and there's no charge. Life happens — tell me and
+           we'll sort it out.</p></details>
+      <details><summary>Do you prescribe medication?</summary>
+        <p>No, that's outside an LCSW's scope. If medication seems worth exploring I'll
+           refer you to a psychiatrist I trust and we'll keep working together.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band" id="book">
+  <div class="wrap">
+    <p class="eyebrow">Ready when you are</p>
+    <h2 style="max-width:22ch">Let's find out if we're a <em>good fit</em>.</h2>
+    <p class="lead" style="max-width:52ch">A free 15-minute call. No pressure, no
+       commitment — just a conversation.</p>
+    <a class="btn" href="#">Book a free consult</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap footer__grid">
+    <div>
+      <a class="wordmark" href="#"><b>Johanna Bellorin</b><span>LCSW · New York City</span></a>
+      <p style="font-size:.9375rem;color:var(--ink-muted);margin-top:var(--sp-4)">
+        Licensed Clinical Social Worker. Individual and couples therapy in Manhattan
+        and online across New York State.</p>
+    </div>
+    <div><h4>Practice</h4><ul>
+      <li><a href="#about">About</a></li><li><a href="#services">Services</a></li>
+      <li><a href="#fees">Fees &amp; insurance</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+    <div><h4>Get in touch</h4><ul>
+      <li><a href="#">hello@johannabellorin.com</a></li><li><a href="#">(212) 555-0148</a></li>
+      <li>Flatiron, New York, NY</li></ul></div>
+  </div>
+  <div class="wrap footer__legal">
+    © 2026 Johanna Bellorin, LCSW · Contenido de relleno, pendiente de texto y fotos reales
+  </div>
+</footer>
+
+</body>
+</html>

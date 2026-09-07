@@ -1,0 +1,38 @@
+---
+/**
+ * Página de gracias, en inglés. Ruta: /thanks
+ * El Worker redirige aquí tras un envío correcto del formulario.
+ *
+ * No es un acuse de recibo, es el único momento en que ella le habla a alguien
+ * que acaba de dar un paso difícil. El microcopy hace ese trabajo.
+ * Ver docs/voz-y-contenido.md sección 4.
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { t, path } from '@i18n/index';
+
+const locale = 'en' as const;
+const ui = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  page="thanks"
+  title={ui.thanks.heading}
+  description="Your message has been sent."
+>
+  <section class="wrap simple-page">
+    <h1>{ui.thanks.heading}</h1>
+    <p class="lead">{ui.thanks.body}</p>
+    <a class="btn" href={path('home', locale)}>{ui.thanks.backHome}</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .simple-page {
+    padding-block: 5rem 6rem;
+    max-width: 40rem;
+    display: grid;
+    justify-items: start;
+    gap: var(--sp-4);
+  }
+</style>

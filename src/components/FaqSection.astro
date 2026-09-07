@@ -1,0 +1,119 @@
+---
+/**
+ * Acordeón de preguntas frecuentes, con `<details>` nativo. Cero JavaScript.
+ *
+ * En la home muestra solo las marcadas `featured: true` y enlaza a /info para
+ * el resto. En /info se muestran todas, pasando `featured={false}`.
+ *
+ * Las preguntas están escritas para sonar a lo que alguien escribiría en el
+ * buscador a las dos de la mañana. Es donde vive buena parte de la
+ * personalidad del sitio. Ver docs/voz-y-contenido.md sección 4.
+ */
+import { getCollection, render } from 'astro:content';
+import type { LocaleCode } from '@data/practice';
+import { t, path } from '@i18n/index';
+
+interface Props {
+  locale: LocaleCode;
+  eyebrow: string;
+  heading: string;
+  /** Si es `true`, solo las destacadas. La home pasa `true`; /info pasa `false`. */
+  onlyFeatured?: boolean;
+  /** Si es `true`, añade el enlace a /info con el resto de preguntas. */
+  showMoreLink?: boolean;
+}
+
+const { locale, eyebrow, heading, onlyFeatured = true, showMoreLink = true } = Astro.props;
+const ui = t(locale);
+
+const all = (await getCollection('faq'))
+  .filter((entry) => entry.id.startsWith(`${locale}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const entries = onlyFeatured ? all.filter((e) => e.data.featured) : all;
+
+// Se renderiza el cuerpo de cada respuesta por adelantado, porque no se puede
+// hacer `await` dentro del JSX.
+const rendered = await Promise.all(
+  entries.map(async (entry) => ({
+    question: entry.data.question,
+    Content: (await render(entry)).Content,
+  })),
+);
+
+const hasMore = onlyFeatured && all.length > entries.length;
+---
+
+{rendered.length > 0 && (
+  <section class="faq-section" id="faq">
+    <div class="wrap">
+      <p class="eyebrow">{eyebrow}</p>
+      <h2>{heading}</h2>
+
+      <div class="faq glass faq-section__panel">
+        {rendered.map(({ question, Content }, index) => (
+          <details open={index === 0}>
+            <summary>{question}</summary>
+            <Content />
+          </details>
+        ))}
+      </div>
+
+      {showMoreLink && hasMore && (
+        <p class="faq-section__more">
+          <a href={path('info', locale)}>{ui.cta.readMore} →</a>
+        </p>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .faq-section {
+    padding-block: 4.5rem;
+  }
+
+  .faq-section__panel {
+    margin-top: var(--sp-6);
+    padding: var(--sp-6);
+    border-radius: var(--radius);
+  }
+
+  /* El contenido de la respuesta viene de Markdown, así que los párrafos son
+     hijos generados y necesitan `:global`. */
+  .faq-section__panel :global(details p) {
+    margin: var(--sp-4) 0 0;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    color: var(--ink-muted);
+    line-height: 1.65;
+  }
+
+  .faq-section__more {
+    margin-top: var(--sp-5);
+  }
+
+  .faq-section__more a {
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    text-decoration: none;
+  }
+
+  .faq-section__more a:hover,
+  .faq-section__more a:focus-visible {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 899px) {
+    .faq-section {
+      padding-block: 3rem;
+    }
+
+    .faq-section__panel {
+      padding: var(--sp-5);
+    }
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+/**
+ * Página de gracias, en español. Ruta: /es/gracias
+ */
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { t, path } from '@i18n/index';
+
+const locale = 'es' as const;
+const ui = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  page="thanks"
+  title={ui.thanks.heading}
+  description="Tu mensaje ha sido enviado."
+>
+  <section class="wrap simple-page">
+    <h1>{ui.thanks.heading}</h1>
+    <p class="lead">{ui.thanks.body}</p>
+    <a class="btn" href={path('home', locale)}>{ui.thanks.backHome}</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .simple-page {
+    padding-block: 5rem 6rem;
+    max-width: 40rem;
+    display: grid;
+    justify-items: start;
+    gap: var(--sp-4);
+  }
+</style>

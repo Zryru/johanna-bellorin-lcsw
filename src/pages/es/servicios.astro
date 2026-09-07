@@ -1,0 +1,42 @@
+---
+/**
+ * Servicios, en español. Ruta: /es/servicios
+ *
+ * El archivo de contenido se llama `services.md`, no `servicios.md`: los
+ * nombres de archivo son canónicos en inglés aunque la URL esté traducida.
+ * El mapa de slugs está en src/i18n/routes.ts.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import ServiceDetail from '@components/ServiceDetail.astro';
+import CtaBand from '@components/CtaBand.astro';
+
+const locale = 'es' as const;
+const entry = await getEntry('pages', 'es/services');
+if (!entry) throw new Error('Falta src/content/pages/es/services.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow } = entry.data;
+---
+
+<BaseLayout locale={locale} page="services" title={title} description={description}>
+  <Hero
+    locale={locale}
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    variant="page"
+  >
+    <Content />
+  </Hero>
+
+  <ServiceDetail locale={locale} />
+
+  <CtaBand
+    locale={locale}
+    eyebrow="Cuando tú quieras"
+    heading="¿Sigues sin saber cuál te encaja?"
+    body="Para eso es la llamada inicial. Lo averiguamos juntas."
+  />
+</BaseLayout>

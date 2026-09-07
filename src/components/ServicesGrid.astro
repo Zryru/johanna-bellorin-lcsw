@@ -1,0 +1,75 @@
+---
+/**
+ * Bento de servicios. Resumen en la home; el detalle vive en /services.
+ *
+ * Las tarjetas y la página de detalle salen del MISMO archivo de contenido:
+ * `summary` alimenta la tarjeta y el cuerpo del Markdown alimenta la página.
+ * Así no se pueden desincronizar.
+ *
+ * Cada tarjeta enlaza al ancla de su servicio dentro de /services, así que el
+ * "Learn more" lleva exactamente a la sección que amplía esa tarjeta.
+ *
+ * Nota sobre la rejilla: la maqueta tenía cinco tarjetas y la primera al doble
+ * de ancho (`.card--wide`). Con tres servicios esa combinación deja un hueco
+ * feo en la rejilla de tres columnas, así que las tres van del mismo tamaño y
+ * ocupan una fila limpia.
+ */
+import { getCollection } from 'astro:content';
+import type { LocaleCode } from '@data/practice';
+import { t, path } from '@i18n/index';
+import Icon from '@components/Icon.astro';
+
+interface Props {
+  locale: LocaleCode;
+  eyebrow: string;
+  heading: string;
+  intro?: string | undefined;
+}
+
+const { locale, eyebrow, heading, intro } = Astro.props;
+const ui = t(locale);
+
+const services = (await getCollection('services'))
+  .filter((entry) => entry.id.startsWith(`${locale}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+/** El ancla dentro de /services: el nombre del archivo sin el idioma. */
+const anchorOf = (id: string) => id.split('/').at(-1) ?? '';
+const servicesPath = path('services', locale);
+---
+
+<section class="services" id="services">
+  <div class="wrap">
+    <p class="eyebrow">{eyebrow}</p>
+    <h2>{heading}</h2>
+    {intro && <p class="lead services__intro">{intro}</p>}
+
+    <div class="bento">
+      {services.map((service) => (
+        <a class="card glass" href={`${servicesPath}#${anchorOf(service.id)}`}>
+          <span class="card__icon"><Icon name={service.data.icon} /></span>
+          <h3>{service.data.title}</h3>
+          <p>{service.data.summary}</p>
+          <span class="card__more">{ui.cta.learnMore} →</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .services {
+    padding-block: 4.5rem;
+  }
+
+  .services__intro {
+    margin-bottom: var(--sp-6);
+    max-width: 52ch;
+  }
+
+  @media (max-width: 899px) {
+    .services {
+      padding-block: 3rem;
+    }
+  }
+</style>

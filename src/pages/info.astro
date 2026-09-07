@@ -1,0 +1,48 @@
+---
+/**
+ * Tarifas, seguros y FAQ, en inglés. Ruta: /info
+ *
+ * Reutiliza PaymentPaths (los dos caminos + aviso GFE) y FaqSection con
+ * onlyFeatured=false, así que aquí se muestran TODAS las preguntas, no solo
+ * las destacadas de la home. Su pareja en español es src/pages/es/informacion.astro.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import PaymentPaths from '@components/PaymentPaths.astro';
+import FaqSection from '@components/FaqSection.astro';
+
+const locale = 'en' as const;
+const entry = await getEntry('pages', 'en/info');
+if (!entry) throw new Error('Falta src/content/pages/en/info.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow } = entry.data;
+---
+
+<BaseLayout locale={locale} page="info" title={title} description={description}>
+  <Hero
+    locale={locale}
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    variant="page"
+  >
+    <Content />
+  </Hero>
+
+  <PaymentPaths
+    locale={locale}
+    eyebrow="Paying for therapy"
+    heading="Two ways in"
+    intro="Insurance through Headway, or private pay through SimplePractice. Both start with the same intro call."
+  />
+
+  <FaqSection
+    locale={locale}
+    eyebrow="Good to know"
+    heading="Questions people ask first"
+    onlyFeatured={false}
+    showMoreLink={false}
+  />
+</BaseLayout>

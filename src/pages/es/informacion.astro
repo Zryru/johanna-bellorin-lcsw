@@ -1,0 +1,47 @@
+---
+/**
+ * Tarifas, seguros y FAQ, en español. Ruta: /es/informacion
+ *
+ * El archivo de contenido se llama `info.md`: nombres canónicos en inglés
+ * aunque la URL esté traducida. Mapa de slugs en src/i18n/routes.ts.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import PaymentPaths from '@components/PaymentPaths.astro';
+import FaqSection from '@components/FaqSection.astro';
+
+const locale = 'es' as const;
+const entry = await getEntry('pages', 'es/info');
+if (!entry) throw new Error('Falta src/content/pages/es/info.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow } = entry.data;
+---
+
+<BaseLayout locale={locale} page="info" title={title} description={description}>
+  <Hero
+    locale={locale}
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    variant="page"
+  >
+    <Content />
+  </Hero>
+
+  <PaymentPaths
+    locale={locale}
+    eyebrow="Pagar la terapia"
+    heading="Dos formas de entrar"
+    intro="Con seguro a través de Headway, o pago privado por SimplePractice. Las dos empiezan con la misma llamada inicial."
+  />
+
+  <FaqSection
+    locale={locale}
+    eyebrow="Bueno saberlo"
+    heading="Lo que la gente pregunta primero"
+    onlyFeatured={false}
+    showMoreLink={false}
+  />
+</BaseLayout>

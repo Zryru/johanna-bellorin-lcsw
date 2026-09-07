@@ -1,0 +1,31 @@
+---
+/**
+ * Contacto, en inglés. Ruta: /contact
+ * Su pareja en español es src/pages/es/contacto.astro.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import ContactSection from '@components/ContactSection.astro';
+
+const locale = 'en' as const;
+const entry = await getEntry('pages', 'en/contact');
+if (!entry) throw new Error('Falta src/content/pages/en/contact.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow } = entry.data;
+---
+
+<BaseLayout locale={locale} page="contact" title={title} description={description}>
+  <Hero
+    locale={locale}
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    variant="page"
+  >
+    <Content />
+  </Hero>
+
+  <ContactSection locale={locale} />
+</BaseLayout>

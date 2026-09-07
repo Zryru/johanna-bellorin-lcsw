@@ -1,0 +1,126 @@
+---
+/**
+ * Cuerpo de la página de contacto: los dos destinos de reserva, el formulario,
+ * y el aviso de crisis destacado.
+ *
+ * La reserva directa va primero porque para quien ya sabe lo que quiere es el
+ * camino más rápido y va a un sistema con BAA (Headway / SimplePractice). El
+ * formulario es el canal secundario, para quien tiene preguntas.
+ *
+ * El aviso de crisis va destacado aquí, no solo en el pie: alguien en apuros
+ * puede aterrizar directo en esta página. NO SUAVIZAR, viene de legal-notices.
+ */
+import type { LocaleCode } from '@data/practice';
+import { practice } from '@data/practice';
+import { crisisNotice } from '@data/legal-notices';
+import { t, path } from '@i18n/index';
+import ContactForm from '@components/ContactForm.astro';
+
+interface Props {
+  locale: LocaleCode;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+// Destinos de reserva. Solo se muestran los que tienen URL configurada en
+// practice.ts; mientras estén vacíos, esta franja no aparece y queda solo el
+// formulario.
+const bookingLinks = [
+  { label: ui.cta.withInsurance, href: practice.booking.insurance },
+  { label: ui.cta.payingPrivately, href: practice.booking.privatePay },
+].filter((b) => b.href);
+---
+
+<section class="contact-body">
+  <div class="wrap contact-body__grid">
+    <div class="contact-body__main">
+      {bookingLinks.length > 0 && (
+        <div class="booking">
+          <h2 class="booking__heading">{ui.contact.bookingHeading}</h2>
+          <p class="booking__blurb">{ui.contact.bookingBlurb}</p>
+          <div class="booking__links">
+            {bookingLinks.map((b) => (
+              <a class="btn" href={b.href}>{b.label}</a>
+            ))}
+          </div>
+          <p class="booking__or">{ui.contact.orReachOut}</p>
+        </div>
+      )}
+
+      <ContactForm locale={locale} />
+    </div>
+
+    {/* Aviso de crisis, destacado. */}
+    <aside class="crisis" role="note">
+      <h2 class="crisis__heading">{ui.footer.crisisHeading}</h2>
+      <p>{crisisNotice[locale]}</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .contact-body {
+    padding-block: 4rem 5rem;
+  }
+
+  .contact-body__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .booking {
+    margin-bottom: var(--sp-6);
+  }
+
+  .booking__heading {
+    margin: 0 0 var(--sp-2);
+  }
+
+  .booking__blurb {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    margin: 0 0 var(--sp-4);
+  }
+
+  .booking__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .booking__or {
+    font-family: var(--font-ui);
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    margin: var(--sp-5) 0 0;
+  }
+
+  .crisis {
+    background: var(--accent-3);
+    border-radius: var(--radius);
+    padding: var(--sp-5);
+  }
+
+  .crisis__heading {
+    margin: 0 0 var(--sp-3);
+    font-size: 1.125rem;
+  }
+
+  .crisis p {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  @media (max-width: 899px) {
+    .contact-body__grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>

@@ -1,0 +1,105 @@
+---
+/**
+ * Sección de vídeo de presentación, con la cita destacada al lado.
+ * Franja azul cielo (`--block-1`), la primera parada del ritmo de color.
+ *
+ * PENDIENTE: los vídeos están por grabar. Mientras no exista el archivo se
+ * pinta el marcador con el botón de reproducción, igual que la maqueta.
+ *
+ * Cuando lleguen: dos clips cortos, autoalojados en `public/video/`. El límite
+ * de Cloudflare es 25 MiB por archivo, así que un minuto en 1080p bien
+ * comprimido entra de sobra.
+ *
+ * IMPORTANTE al añadirlos: `preload="none"` y una imagen de póster. Sin eso, un
+ * vídeo de 20 MB se descarga al cargar la página y destroza el tiempo de
+ * pintado en móvil. Y nunca `autoplay`.
+ */
+import type { LocaleCode } from '@data/practice';
+import { nameWithCredential } from '@data/practice';
+
+interface Props {
+  locale: LocaleCode;
+  quote?: { text: string; attribution?: string | undefined } | undefined;
+  /** Ruta del vídeo en `public/`. Si está vacía se pinta el marcador. */
+  src?: string | undefined;
+  /** Imagen de póster, obligatoria si hay vídeo. */
+  poster?: string | undefined;
+}
+
+const { locale, quote, src, poster } = Astro.props;
+
+const playLabel = locale === 'es'
+  ? 'Reproducir el vídeo de bienvenida'
+  : 'Play the welcome video';
+
+const placeholderLabel = locale === 'es' ? 'Vídeo de 1 min' : '1 min video';
+---
+
+<section class="video" id="about">
+  <div class="wrap video__grid">
+    {src ? (
+      <video
+        class="video__player"
+        controls
+        preload="none"
+        poster={poster}
+        aria-label={playLabel}
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+    ) : (
+      <div class="video__frame">
+        <button class="play" type="button" aria-label={playLabel} disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+        </button>
+        <span class="photo__tag video__tag">{placeholderLabel}</span>
+      </div>
+    )}
+
+    {quote && (
+      <figure class="quote">
+        <blockquote>
+          <p set:html={quote.text} />
+        </blockquote>
+        <figcaption>
+          <cite>{quote.attribution ?? nameWithCredential()}</cite>
+        </figcaption>
+      </figure>
+    )}
+  </div>
+</section>
+
+<style>
+  .video {
+    padding-block: 4.5rem;
+  }
+
+  .video__player {
+    width: 100%;
+    border-radius: var(--radius);
+    display: block;
+    box-shadow: var(--shadow);
+  }
+
+  .video__tag {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+  }
+
+  /* `.quote` viene de skeleton.css. Aquí solo se limpian los márgenes que
+     trae `<figure>` por defecto. */
+  .quote {
+    margin: 0;
+  }
+
+  .quote blockquote {
+    margin: 0;
+  }
+
+  @media (max-width: 899px) {
+    .video {
+      padding-block: 3rem;
+    }
+  }
+</style>

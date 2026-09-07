@@ -1,0 +1,10 @@
+name = "johanna-contact-form"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+# Secrets (configurar con `wrangler secret put`, nunca aquí):
+#   RESEND_API_KEY, TURNSTILE_SECRET, NOTIFY_TO, NOTIFY_FROM
+#
+# Variable no secreta: el origen permitido. Cambiar al dominio real.
+[vars]
+ALLOWED_ORIGIN = "https://johannabellorin.com"

@@ -1,0 +1,186 @@
+---
+/**
+ * Pie de página. Efecto cristal, cuatro columnas.
+ *
+ * Todo lo legal sale de `legal-notices.ts` y todos los hechos de
+ * `practice.ts`. Aquí no se escribe a mano ni la credencial, ni el estado, ni
+ * un teléfono. Si algo aparece vacío es porque el dato todavía no existe, y
+ * entonces no se pinta en lugar de mostrar un hueco.
+ */
+import type { LocaleCode } from '@data/practice';
+import { practice, nameWithCredential } from '@data/practice';
+import {
+  crisisNotice,
+  noRelationshipDisclaimer,
+  licenseStatement,
+} from '@data/legal-notices';
+import { t, path, NAV_PAGES } from '@i18n/index';
+
+interface Props {
+  locale: LocaleCode;
+  /** Nombres de los estados con licencia, ya traducidos. */
+  states: string;
+}
+
+const { locale, states } = Astro.props;
+const ui = t(locale);
+const year = new Date().getFullYear();
+
+const links = NAV_PAGES.map((page) => ({
+  href: path(page, locale),
+  label: ui.nav[page],
+}));
+
+const hasContact = Boolean(practice.contact.email || practice.contact.phone);
+---
+
+<footer class="footer">
+  <div class="wrap footer__grid">
+    <div class="footer__brand">
+      <p class="wordmark"><b>{practice.name}</b></p>
+      <p class="footer__license">
+        {licenseStatement(locale, practice.credential, states)}
+      </p>
+      {practice.identifiers.licenseNumber && (
+        <p class="footer__ids">
+          {locale === 'es' ? 'Licencia' : 'License'} #{practice.identifiers.licenseNumber}
+          {practice.identifiers.npi && <> · NPI {practice.identifiers.npi}</>}
+        </p>
+      )}
+    </div>
+
+    <nav class="footer__col" aria-label={ui.a11y.footerNav}>
+      <h2 class="footer__heading">{ui.footer.navHeading}</h2>
+      <ul>
+        {links.map(({ href, label }) => (
+          <li><a href={href}>{label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="footer__col">
+      <h2 class="footer__heading">{ui.footer.contactHeading}</h2>
+      {hasContact ? (
+        <ul>
+          {practice.contact.email && (
+            <li><a href={`mailto:${practice.contact.email}`}>{practice.contact.email}</a></li>
+          )}
+          {practice.contact.phone && (
+            <li><a href={`tel:${practice.contact.phone.replace(/[^\d+]/g, '')}`}>{practice.contact.phone}</a></li>
+          )}
+        </ul>
+      ) : (
+        <ul>
+          <li><a href={path('contact', locale)}>{ui.cta.getInTouch}</a></li>
+        </ul>
+      )}
+    </div>
+
+    {/*
+      Aviso de crisis. Suena seco al lado del resto del sitio y es a
+      propósito: alguien en crisis a las tres de la mañana no necesita
+      ingenio, necesita un número. NO SUAVIZAR.
+      Ver src/data/legal-notices.ts.
+    */}
+    <div class="footer__col footer__crisis">
+      <h2 class="footer__heading">{ui.footer.crisisHeading}</h2>
+      <p>{crisisNotice[locale]}</p>
+    </div>
+  </div>
+
+  <div class="wrap footer__legal">
+    <p>{noRelationshipDisclaimer[locale]}</p>
+    <p class="footer__copy">
+      © {year} {practice.identifiers.legalEntity || nameWithCredential()}. {ui.footer.copyright}
+      <a href={path('privacy', locale)}>{ui.nav.privacy}</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1.5fr;
+    gap: 2.5rem;
+    padding-block: 3.5rem 2rem;
+  }
+
+  .footer__heading {
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0 0 0.75rem;
+  }
+
+  .footer__col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .footer__col a {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    text-decoration: none;
+  }
+
+  .footer__col a:hover,
+  .footer__col a:focus-visible {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .footer__license,
+  .footer__ids {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    font-size: 0.9375rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .footer__crisis p {
+    font-family: var(--font-body);
+    color: var(--ink);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .footer__legal {
+    border-top: 1px solid var(--hairline);
+    padding-block: 1.5rem 2.5rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .footer__legal p {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .footer__copy a {
+    color: var(--ink-muted);
+    margin-left: 0.5rem;
+  }
+
+  @media (max-width: 860px) {
+    .footer__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .footer__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

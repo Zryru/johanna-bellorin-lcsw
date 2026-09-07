@@ -1,0 +1,90 @@
+---
+/**
+ * Página 404.
+ *
+ * Una URL rota no tiene idioma fiable, así que se muestran los dos: inglés
+ * arriba, español debajo. El microcopy es cálido, no un código de error seco.
+ * Ver docs/voz-y-contenido.md sección 4.
+ *
+ * No usa BaseLayout porque BaseLayout pide un `page` del mapa de rutas y el 404
+ * no es una página del sitio. Lleva su propio <head> mínimo.
+ */
+import { t, path } from '@i18n/index';
+import { nameWithCredential } from '@data/practice';
+
+import '@fontsource/cormorant-garamond/latin-300.css';
+import '@fontsource/jost/latin-300.css';
+import '@fontsource/jost/latin-500.css';
+import '@fontsource/lato/latin-400.css';
+import '@styles/skeleton.css';
+import '@styles/glass.css';
+import '@styles/tokens.css';
+
+const en = t('en');
+const es = t('es');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>404 — {nameWithCredential()}</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <main class="notfound">
+      <div class="wrap notfound__inner">
+        <p class="notfound__code">404</p>
+
+        <div class="notfound__block">
+          <h1>{en.notFound.heading}</h1>
+          <p class="lead">{en.notFound.body}</p>
+          <a class="btn" href={path('home', 'en')}>{en.notFound.backHome}</a>
+        </div>
+
+        <div class="notfound__block" lang="es">
+          <h2>{es.notFound.heading}</h2>
+          <p class="lead">{es.notFound.body}</p>
+          <a class="btn btn--ghost" href={path('home', 'es')}>{es.notFound.backHome}</a>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .notfound {
+    min-height: 80vh;
+    display: grid;
+    place-items: center;
+    padding-block: 4rem;
+  }
+
+  .notfound__inner {
+    display: grid;
+    gap: var(--sp-6);
+    justify-items: start;
+    max-width: 40rem;
+  }
+
+  .notfound__code {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: var(--accent-ink);
+    margin: 0;
+    line-height: 1;
+  }
+
+  .notfound__block {
+    display: grid;
+    gap: var(--sp-3);
+    justify-items: start;
+  }
+
+  .notfound__block h1,
+  .notfound__block h2 {
+    margin: 0;
+  }
+</style>

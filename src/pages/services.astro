@@ -1,0 +1,42 @@
+---
+/**
+ * Servicios, en inglés. Ruta: /services
+ *
+ * El detalle de cada servicio sale de src/content/services/en/*.md, la misma
+ * colección que alimenta las tarjetas de la home. Su pareja en español es
+ * src/pages/es/servicios.astro.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import ServiceDetail from '@components/ServiceDetail.astro';
+import CtaBand from '@components/CtaBand.astro';
+
+const locale = 'en' as const;
+const entry = await getEntry('pages', 'en/services');
+if (!entry) throw new Error('Falta src/content/pages/en/services.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow } = entry.data;
+---
+
+<BaseLayout locale={locale} page="services" title={title} description={description}>
+  <Hero
+    locale={locale}
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    variant="page"
+  >
+    <Content />
+  </Hero>
+
+  <ServiceDetail locale={locale} />
+
+  <CtaBand
+    locale={locale}
+    eyebrow="Ready when you are"
+    heading="Still not sure which one fits?"
+    body="That's what the intro call is for. We'll figure it out together."
+  />
+</BaseLayout>

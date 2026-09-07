@@ -1,0 +1,85 @@
+---
+/**
+ * Detalle completo de los servicios, para la página /services.
+ *
+ * Consume la MISMA colección que las tarjetas de la home: allí se usa
+ * `summary`, aquí el cuerpo del Markdown. Cada servicio lleva el `id` del
+ * nombre de su archivo, que es el ancla a la que apuntan las tarjetas.
+ *
+ * Las franjas de color alternan entre secciones para mantener el ritmo del
+ * diseño al bajar por la página.
+ */
+import { getCollection, render } from 'astro:content';
+import type { LocaleCode } from '@data/practice';
+import { t, path } from '@i18n/index';
+import Icon from '@components/Icon.astro';
+
+interface Props {
+  locale: LocaleCode;
+}
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+const services = (await getCollection('services'))
+  .filter((entry) => entry.id.startsWith(`${locale}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const rendered = await Promise.all(
+  services.map(async (entry) => ({
+    anchor: entry.id.split('/').at(-1) ?? '',
+    data: entry.data,
+    Content: (await render(entry)).Content,
+  })),
+);
+---
+
+{rendered.map(({ anchor, data, Content }, index) => (
+  <section
+    class:list={['service', index % 2 === 1 && 'band-sky']}
+    id={anchor}
+  >
+    <div class="wrap service__inner">
+      <span class="card__icon service__icon"><Icon name={data.icon} /></span>
+      <h2>{data.title}</h2>
+      <p class="lead">{data.summary}</p>
+      <div class="service__body">
+        <Content />
+      </div>
+      <a class="btn" href={path('contact', locale)}>{ui.cta.bookConsult}</a>
+    </div>
+  </section>
+))}
+
+<style>
+  .service {
+    padding-block: 4rem;
+  }
+
+  .service__inner {
+    max-width: 44rem;
+    display: grid;
+    justify-items: start;
+    gap: var(--sp-3);
+  }
+
+  .service__icon {
+    margin-bottom: var(--sp-2);
+  }
+
+  .service__body :global(p) {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+
+  .service__inner .btn {
+    margin-top: var(--sp-4);
+  }
+
+  @media (max-width: 899px) {
+    .service {
+      padding-block: 2.75rem;
+    }
+  }
+</style>

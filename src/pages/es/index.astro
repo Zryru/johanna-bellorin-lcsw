@@ -1,0 +1,66 @@
+---
+/**
+ * Home en español. Ruta: /es
+ *
+ * Misma estructura de secciones que src/pages/index.astro, con el mismo ritmo
+ * de color. Si añades una sección aquí, añádela también allí.
+ */
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import Hero from '@components/Hero.astro';
+import VideoIntro from '@components/VideoIntro.astro';
+import ServicesGrid from '@components/ServicesGrid.astro';
+import PaymentPaths from '@components/PaymentPaths.astro';
+import FaqSection from '@components/FaqSection.astro';
+import CtaBand from '@components/CtaBand.astro';
+
+const locale = 'es' as const;
+const entry = await getEntry('pages', 'es/home');
+if (!entry) throw new Error('Falta src/content/pages/es/home.md');
+
+const { Content } = await render(entry);
+const { title, description, heading, subheading, eyebrow, traits, quote, sections } = entry.data;
+if (!sections) throw new Error('La home necesita el bloque `sections` en su frontmatter');
+---
+
+<BaseLayout locale={locale} page="home" title={title} description={description}>
+  <Hero
+    locale={locale}
+    variant="home"
+    heading={heading}
+    subheading={subheading}
+    eyebrow={eyebrow}
+    traits={traits}
+  >
+    <Content />
+  </Hero>
+
+  <VideoIntro locale={locale} quote={quote} />
+
+  <ServicesGrid
+    locale={locale}
+    eyebrow={sections.services.eyebrow}
+    heading={sections.services.heading}
+    intro={sections.services.intro}
+  />
+
+  <PaymentPaths
+    locale={locale}
+    eyebrow={sections.fees.eyebrow}
+    heading={sections.fees.heading}
+    intro={sections.fees.intro}
+  />
+
+  <FaqSection
+    locale={locale}
+    eyebrow={sections.faq.eyebrow}
+    heading={sections.faq.heading}
+  />
+
+  <CtaBand
+    locale={locale}
+    eyebrow={sections.cta.eyebrow}
+    heading={sections.cta.heading}
+    body={sections.cta.intro}
+  />
+</BaseLayout>
