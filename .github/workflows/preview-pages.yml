@@ -32,9 +32,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -64,6 +64,11 @@ jobs:
           } > dist/robots.txt
 
       - uses: actions/configure-pages@v5
+        with:
+          # Habilita Pages en el repo si no lo está ya, sin tener que tocar la
+          # UI. Requiere que el workflow tenga permiso `pages: write`, que ya lo
+          # tiene arriba.
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
