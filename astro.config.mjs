@@ -1,12 +1,27 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
+/*
+ * Despliegue en GitHub Pages, SOLO como preview temporal.
+ *
+ * Pages sirve el sitio en un subdirectorio (zryru.github.io/<repo>/), no en la
+ * raíz, así que hay que decírselo a Astro con `base`. El destino real es
+ * Cloudflare con dominio propio, donde no hay subdirectorio.
+ *
+ * Estas dos variables las pone el workflow de Pages (.github/workflows). En una
+ * build normal no existen, así que `base` queda en '/' y el `site` en el
+ * dominio real. Así la build de Pages no contamina la de producción.
+ */
+const isPages = process.env.GITHUB_PAGES === 'true';
+const repoBase = '/johanna-bellorin-lcsw';
+
 // https://astro.build/config
 export default defineConfig({
   // PENDIENTE: el dominio real no está comprado todavía. Se usa aquí para que
   // las URLs canónicas y el sitemap se generen bien. Cambiar al comprarlo.
   // Ver docs/preguntas-abiertas.md, sección 1.
-  site: 'https://johannabellorin.com',
+  site: isPages ? 'https://zryru.github.io' : 'https://johannabellorin.com',
+  base: isPages ? repoBase : '/',
 
   // Salida estática. El formulario no necesita servidor: lo procesa un Worker
   // aparte. Ver docs/plan.md sección 7.

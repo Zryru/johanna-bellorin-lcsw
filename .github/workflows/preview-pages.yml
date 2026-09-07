@@ -1,0 +1,76 @@
+# Despliegue de PREVIEW en GitHub Pages.
+#
+# TEMPORAL, solo para enseñar el sitio mientras no está en Cloudflare. El
+# destino real es Cloudflare con dominio propio. Ver docs/plan.md sección 1.
+#
+# Dos cosas que Pages necesita y que este workflow resuelve:
+#   - GITHUB_PAGES=true → activa el `base` de subdirectorio en astro.config.mjs
+#   - .nojekyll → evita que Jekyll ignore la carpeta _astro/ (CSS y fuentes)
+#
+# OJO: el formulario de contacto NO funciona en Pages. Su Worker es de
+# Cloudflare y Pages no lo ejecuta. En el preview el formulario se ve pero no
+# envía, que para enseñar el diseño es suficiente.
+
+name: Preview en GitHub Pages
+
+on:
+  # Solo manual, desde la pestaña Actions. Así Pages no se convierte por
+  # inercia en el sitio "de verdad" con cada push.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un despliegue a la vez.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (modo Pages)
+        env:
+          # GITHUB_PAGES: activa el `base` de subdirectorio (astro.config.mjs).
+          GITHUB_PAGES: 'true'
+          # PUBLIC_*: llega al cliente. Activa el meta noindex en el layout, para
+          # que el preview no se indexe en buscadores.
+          PUBLIC_GITHUB_PAGES: 'true'
+        run: npm run build
+
+      # Jekyll ignora carpetas con guion bajo, como _astro/. Sin esto el sitio
+      # sale sin estilos ni fuentes.
+      - run: touch dist/.nojekyll
+
+      # robots.txt que bloquea todo, como refuerzo del meta noindex. Se genera
+      # solo aquí, para que la build de producción no lo herede. Es preview.
+      - name: robots.txt de preview (bloquea indexación)
+        run: printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

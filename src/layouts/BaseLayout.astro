@@ -44,6 +44,14 @@ const canonical = new URL(path(page, locale), Astro.site).href;
 const langAlternates = alternates(page);
 
 /**
+ * En el preview de GitHub Pages el sitio no debe indexarse: lleva el nombre
+ * real de Johanna con datos de contacto ficticios, y no es la versión
+ * definitiva. En la build de producción esta señal no existe, así que el sitio
+ * sale indexable con normalidad. Ver .github/workflows/preview-pages.yml.
+ */
+const noindex = import.meta.env.PUBLIC_GITHUB_PAGES === 'true';
+
+/**
  * JSON-LD. `MedicalBusiness` SIN `address`, porque no hay consulta física y
  * publicar una dirección falsa sería peor que no publicar ninguna.
  * `schema.org` no tiene tipo `Therapist`, aunque el plan original lo usaba.
@@ -90,6 +98,7 @@ const nameVariants = `${practice.name}, ${practice.nameAscii}`;
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
 
     {/* hreflang recíproco en todas las páginas, más x-default al inglés. */}

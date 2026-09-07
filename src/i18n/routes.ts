@@ -60,18 +60,27 @@ export const SLUGS: Record<PageKey, Record<LocaleCode, string>> = {
 export const NAV_PAGES: PageKey[] = ['about', 'services', 'info', 'contact'];
 
 /**
- * Construye la URL de una página en un idioma.
+/**
+ * Prefijo de despliegue. En producción (dominio propio) es '/'. En GitHub
+ * Pages es '/johanna-bellorin-lcsw'. Astro lo expone en BASE_URL, con barra
+ * final, así que se la quitamos para no duplicarla al concatenar.
+ */
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/**
+ * Construye la URL de una página en un idioma, con el prefijo de despliegue.
  * El inglés vive en la raíz; el español bajo el prefijo `/es`.
  *
- *   path('about', 'en') → '/about'
+ *   path('about', 'en') → '/about'            (o '/repo/about' en Pages)
  *   path('about', 'es') → '/es/sobre-mi'
  *   path('home',  'es') → '/es'
  */
 export function path(page: PageKey, locale: LocaleCode): string {
   const slug = SLUGS[page][locale];
   const prefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
-  if (!slug) return prefix || '/';
-  return `${prefix}/${slug}`;
+  const route = slug ? `${prefix}/${slug}` : prefix || '/';
+  // Evita la doble barra cuando route es '/' y BASE está vacío.
+  return `${BASE}${route}` || '/';
 }
 
 /**
