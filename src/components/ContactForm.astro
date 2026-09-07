@@ -168,7 +168,9 @@ const languageOptions = [
     border-radius: var(--radius);
     display: grid;
     gap: var(--sp-4);
+    width: 100%;
     max-width: 34rem;
+    box-sizing: border-box;
   }
 
   .contact-form__heading {
@@ -178,6 +180,9 @@ const languageOptions = [
   .field {
     display: grid;
     gap: 0.4rem;
+    /* Sin esto, un campo con contenido intrínseco (el select) puede negarse a
+       encoger por debajo de su ancho preferido y desbordar en móvil. */
+    min-width: 0;
   }
 
   .field label {
@@ -189,6 +194,9 @@ const languageOptions = [
 
   .field input,
   .field select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     font-family: var(--font-body);
     font-size: 1rem;
     padding: 0.7rem 0.85rem;

@@ -130,19 +130,15 @@ const ctaHref = path('contact', locale);
     display: none;
   }
 
-  /* Hamburguesa dibujada con bordes, sin imagen ni icono externo. */
-  .nav__burger,
-  .nav__burger::before,
-  .nav__burger::after {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: var(--ink);
-    border-radius: 2px;
-  }
-
+  /* Hamburguesa: tres barras. El contenedor reserva 20x14 y es la barra
+     central (fondo propio); las pseudos son la de arriba y la de abajo, con
+     `top` absoluto. Reservar altura evita que se vea "chafado". */
   .nav__burger {
     position: relative;
+    display: block;
+    width: 20px;
+    height: 14px;
+    box-sizing: border-box;
   }
 
   .nav__burger::before,
@@ -150,10 +146,22 @@ const ctaHref = path('contact', locale);
     content: '';
     position: absolute;
     left: 0;
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--ink);
   }
 
-  .nav__burger::before { top: -6px; }
-  .nav__burger::after  { top: 6px; }
+  .nav__burger::before { top: 0; }
+  .nav__burger::after { bottom: 0; }
+
+  /* Barra central: una línea fina centrada verticalmente en el contenedor. */
+  .nav__burger {
+    background-image: linear-gradient(var(--ink), var(--ink));
+    background-size: 20px 2px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 
   .nav__drawer {
     position: absolute;
@@ -165,6 +173,11 @@ const ctaHref = path('contact', locale);
     display: grid;
     gap: 0.25rem;
     box-shadow: var(--glass-shadow);
+    /* El cajón flota sobre el contenido de la página al hacer scroll, así que
+       el fondo translúcido de .glass dejaba leer todo lo de detrás. Aquí va
+       casi opaco, con el blur solo como acabado. */
+    background: rgba(253, 248, 240, 0.97);
+    border: 1px solid var(--glass-border-hi);
   }
 
   .nav__drawer a {
