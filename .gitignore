@@ -21,3 +21,8 @@ node_modules/
 # Editores
 *.swp
 .idea/
+
+# Fotos originales sin procesar en la raíz (image-1..6). Las que usa el sitio
+# viven ya optimizadas en src/assets/photos/. Las originales se guardan aparte.
+/image-*.jpeg
+/image-*.jpg

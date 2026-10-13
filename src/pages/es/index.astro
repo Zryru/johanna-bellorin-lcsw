@@ -13,6 +13,7 @@ import ServicesGrid from '@components/ServicesGrid.astro';
 import PaymentPaths from '@components/PaymentPaths.astro';
 import FaqSection from '@components/FaqSection.astro';
 import CtaBand from '@components/CtaBand.astro';
+import johannaHome from '@assets/photos/johanna-home.jpeg';
 
 const locale = 'es' as const;
 const entry = await getEntry('pages', 'es/home');
@@ -31,6 +32,8 @@ if (!sections) throw new Error('La home necesita el bloque `sections` en su fron
     subheading={subheading}
     eyebrow={eyebrow}
     traits={traits}
+    photo={johannaHome}
+    photoAlt="Johanna Bellorín, LCSW"
   >
     <Content />
   </Hero>

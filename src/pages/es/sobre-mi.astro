@@ -9,6 +9,8 @@
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import Hero from '@components/Hero.astro';
+import AboutIntro from '@components/AboutIntro.astro';
+import johannaAbout from '@assets/photos/johanna-about.jpeg';
 
 const locale = 'es' as const;
 const entry = await getEntry('pages', 'es/about');
@@ -27,24 +29,7 @@ const { title, description, heading, subheading, eyebrow } = entry.data;
     variant="page"
   />
 
-  <section class="wrap prose">
+  <AboutIntro photo={johannaAbout} photoAlt="Johanna Bellorín, LCSW">
     <Content />
-  </section>
+  </AboutIntro>
 </BaseLayout>
-
-<style>
-  .prose {
-    padding-block: 3.5rem 5rem;
-    max-width: 44rem;
-  }
-
-  .prose :global(h2) {
-    margin-top: 2.5rem;
-  }
-
-  .prose :global(p) {
-    font-family: var(--font-body);
-    color: var(--ink-muted);
-    line-height: 1.7;
-  }
-</style>

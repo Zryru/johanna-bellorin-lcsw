@@ -1,0 +1,95 @@
+---
+/**
+ * Bloque de introducción de /about: la foto de cuerpo entero de Johanna junto a
+ * la biografía, en dos columnas.
+ *
+ * La foto va aquí y no en el Hero porque es de cuerpo entero y vertical: pide
+ * una columna alta al lado del texto, no el hueco de cabecera. El Hero de las
+ * subpáginas es de una sola columna, sin foto, a propósito.
+ *
+ * La foto se importa en la página y se pasa como prop, para que Astro la
+ * optimice (webp/avif). El contenido de la bio entra por el slot, desde el
+ * Markdown de la página.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { practice } from '@data/practice';
+
+interface Props {
+  photo: ImageMetadata;
+  photoAlt?: string | undefined;
+}
+
+const { photo, photoAlt } = Astro.props;
+---
+
+<section class="about-intro">
+  <div class="wrap about-intro__grid">
+    <div class="about-intro__photo">
+      <Image
+        src={photo}
+        alt={photoAlt ?? practice.name}
+        widths={[400, 600, 800]}
+        sizes="(max-width: 899px) 90vw, 42vw"
+        loading="eager"
+      />
+    </div>
+
+    <div class="about-intro__body prose">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-intro {
+    padding-block: 3.5rem 4rem;
+  }
+
+  .about-intro__grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .about-intro__photo :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    display: block;
+  }
+
+  /* La foto se queda a la vista al bajar leyendo la bio larga, en escritorio. */
+  @media (min-width: 900px) {
+    .about-intro__photo {
+      position: sticky;
+      top: 6rem;
+    }
+  }
+
+  .about-intro__body :global(h2) {
+    margin-top: 0;
+  }
+
+  .about-intro__body :global(h2 ~ h2) {
+    margin-top: 2.5rem;
+  }
+
+  .about-intro__body :global(p) {
+    font-family: var(--font-body);
+    color: var(--ink-muted);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 899px) {
+    .about-intro__grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    /* La foto primero, luego la bio, en móvil. */
+    .about-intro__photo {
+      max-width: 22rem;
+    }
+  }
+</style>
